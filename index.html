@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WC 2026 Bracket Pool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚽ WC 2026 Bracket Pool</h1>
+    <div class="subtitle">Read-only — updated by the commissioner</div>
+  </div>
+  <a href="admin.html" class="commissioner-btn">Commissioner</a>
+</header>
+
+<main>
+
+  <!-- Leaderboard -->
+  <div class="card" id="leaderboard-card">
+    <div class="card-header">🏆 Leaderboard</div>
+    <div id="leaderboard-body">
+      <div class="loading">Loading scores…</div>
+    </div>
+  </div>
+
+  <!-- Bracket picks comparison -->
+  <div class="card" id="bracket-card">
+    <div class="card-header">📋 Bracket Picks</div>
+    <div class="round-tabs" id="round-tabs">
+      <button class="tab active" data-round="RD32">Round of 32</button>
+      <button class="tab" data-round="RD16">Round of 16</button>
+      <button class="tab" data-round="QF">Quarter Finals</button>
+      <button class="tab" data-round="SF">Semi Finals</button>
+      <button class="tab" data-round="Final">Final</button>
+    </div>
+    <div id="bracket-grid">
+      <div class="loading">Loading bracket…</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  WC 2026 Bracket Pool
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
