@@ -119,6 +119,47 @@ async function login() {
   // Success is handled by onAuthStateChange
 }
 
+async function syncNow() {
+  const btn = document.getElementById('sync-btn')
+  if (!btn) return
+  btn.textContent = '⟳ Syncing…'
+  btn.disabled = true
+
+  try {
+    const { data: { session } } = await db.auth.getSession()
+    const res = await fetch(
+      'https://vxlpbbtpzockgmklukki.supabase.co/functions/v1/sync-results',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { 'Authorization': `Bearer ${session.access_token}` } : {}),
+        },
+        body: '{}',
+      }
+    )
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error ?? res.statusText)
+
+    btn.textContent = `✓ Synced (${json.updated} updated)`
+    btn.style.color = 'var(--accent-light)'
+
+    // Reload data and re-render so changes show immediately
+    await loadData()
+    renderTab()
+  } catch (e) {
+    console.error(e)
+    btn.textContent = '✗ Sync failed'
+    btn.style.color = '#e57373'
+  } finally {
+    btn.disabled = false
+    setTimeout(() => {
+      btn.textContent = '⟳ Sync Results'
+      btn.style.color = ''
+    }, 4000)
+  }
+}
+
 async function signOut() {
   await db.auth.signOut();
 }
@@ -139,6 +180,7 @@ function renderAdmin() {
       </div>
       <div style="display:flex;align-items:center;gap:0.75rem;margin-left:auto">
         <span class="admin-user">${email}</span>
+        <button class="btn btn-secondary btn-sm" id="sync-btn" onclick="syncNow()">⟳ Sync Results</button>
         <button class="btn btn-secondary btn-sm" onclick="signOut()">Sign Out</button>
         <a href="index.html" class="btn btn-secondary btn-sm">← Public View</a>
       </div>
