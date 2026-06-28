@@ -13,6 +13,17 @@ const ROUND_LABELS = {
   Final: 'Final'
 };
 
+// Official tournament match numbers (match_number 1 in each round maps to these offsets)
+const OFFICIAL_OFFSET = { RD32: 72, RD16: 88, QF: 96, SF: 100, Final: 102 };
+
+function matchLabel(match) {
+  const official = `Match ${OFFICIAL_OFFSET[match.round] + match.match_number}`;
+  if (match.round === 'RD32' && match.team1 && match.team2) {
+    return { primary: `${match.team1} vs ${match.team2}`, sub: official };
+  }
+  return { primary: official, sub: null };
+}
+
 let state = {
   participants: [],
   matches: [],
@@ -109,10 +120,10 @@ function renderBracket(round) {
   const pCols = state.participants.map(p => `<th>${p.name}</th>`).join('');
 
   const rows = roundMatches.map(match => {
-    const hasTeams = match.team1 && match.team2;
-    const label = hasTeams
-      ? `${match.team1}<span class="vs">vs ${match.team2}</span>`
-      : `Match ${match.match_number}`;
+    const { primary, sub } = matchLabel(match);
+    const label = sub
+      ? `${primary}<span class="vs">${sub}</span>`
+      : primary;
 
     const cells = state.participants.map(p => {
       const pick = state.picks.find(

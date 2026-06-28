@@ -12,6 +12,18 @@ const ROUND_LABELS = {
   SF: 'Semi Finals',
   Final: 'Final'
 };
+const OFFICIAL_OFFSET = { RD32: 72, RD16: 88, QF: 96, SF: 100, Final: 102 };
+
+function officialNum(match) {
+  return OFFICIAL_OFFSET[match.round] + match.match_number;
+}
+
+function matchLabel(match) {
+  if (match.round === 'RD32' && match.team1 && match.team2) {
+    return `${match.team1} vs ${match.team2}`;
+  }
+  return `Match ${officialNum(match)}`;
+}
 
 const state = {
   session: null,
@@ -158,15 +170,18 @@ function renderMatchesTab() {
       .filter(m => m.round === round)
       .sort((a, b) => a.match_number - b.match_number);
 
+    const isRD32 = round === 'RD32';
     const rows = roundMatches.map(m => `
       <tr>
         <td style="color:var(--text-muted);font-size:0.82rem;white-space:nowrap">
-          ${round} ${m.match_number}
+          Match ${officialNum(m)}
         </td>
+        ${isRD32 ? `
         <td><input class="pick-input" id="t1_${m.id}" type="text"
           value="${esc(m.team1 || '')}" placeholder="Team 1"></td>
         <td><input class="pick-input" id="t2_${m.id}" type="text"
           value="${esc(m.team2 || '')}" placeholder="Team 2"></td>
+        ` : `<td colspan="2" style="color:var(--text-muted);font-size:0.8rem">—</td>`}
         <td><input class="pick-input" id="aw_${m.id}" type="text"
           value="${esc(m.actual_winner || '')}" placeholder="Actual winner"></td>
         <td style="white-space:nowrap">
@@ -277,9 +292,7 @@ function buildPicksForm(participant) {
       const pick  = state.picks.find(
         pk => pk.participant_id === participant.id && pk.match_id === m.id
       );
-      const label = m.team1 && m.team2
-        ? `${m.team1} vs ${m.team2}`
-        : `${round} Match ${m.match_number}`;
+      const label = matchLabel(m);
 
       return `
         <div class="pick-row">
