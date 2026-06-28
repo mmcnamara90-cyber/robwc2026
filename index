@@ -1,3 +1,0 @@
-cd "/Users/mika/Documents/Claude/Projects/Rob's WC display"
-git remote add origin https://github.com/YOUR_USERNAME/wc2026-bracket-pool.git
-git push -u origin main
