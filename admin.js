@@ -285,7 +285,10 @@ function buildPicksForm(participant) {
         <div class="pick-row">
           <span class="pick-match-label" title="${label}">${label}</span>
           <input class="pick-input" id="pick_${m.id}" type="text"
-            value="${esc(pick?.picked_winner || '')}" placeholder="Winner">
+            value="${esc(pick?.picked_winner || '')}" placeholder="Winner"
+            onkeydown="if(event.key==='Enter') saveOnePick(${m.id}, ${participant.id})">
+          <button class="btn btn-secondary btn-sm" onclick="saveOnePick(${m.id}, ${participant.id})">Save</button>
+          <span id="pmsg_${m.id}" class="status-msg" style="min-width:1.5rem"></span>
         </div>`;
     }).join('');
 
@@ -295,6 +298,35 @@ function buildPicksForm(participant) {
         <div class="picks-grid">${rows}</div>
       </div>`;
   }).join('');
+}
+
+async function saveOnePick(matchId, participantId) {
+  const input = document.getElementById(`pick_${matchId}`);
+  const msg   = document.getElementById(`pmsg_${matchId}`);
+  const val   = input?.value.trim();
+
+  msg.textContent = '…';
+  msg.className   = 'status-msg status-pending';
+
+  const { error } = await db.from('picks').upsert(
+    { participant_id: participantId, match_id: matchId, picked_winner: val || '' },
+    { onConflict: 'participant_id,match_id' }
+  );
+
+  if (error) {
+    msg.textContent = '✗';
+    msg.className   = 'status-msg status-err';
+    console.error(error);
+  } else {
+    // Update local state
+    const existing = state.picks.find(pk => pk.participant_id === participantId && pk.match_id === matchId);
+    if (existing) existing.picked_winner = val || '';
+    else state.picks.push({ participant_id: participantId, match_id: matchId, picked_winner: val || '', id: Date.now() });
+
+    msg.textContent = '✓';
+    msg.className   = 'status-msg status-ok';
+    setTimeout(() => { msg.textContent = ''; msg.className = 'status-msg'; }, 2000);
+  }
 }
 
 function selectParticipant(id) {
