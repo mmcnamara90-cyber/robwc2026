@@ -68,6 +68,7 @@ function calcScores() {
       }
     });
 
+    points += p.bonus_points || 0;
     return { ...p, points, correct, decided };
   }).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
 }
